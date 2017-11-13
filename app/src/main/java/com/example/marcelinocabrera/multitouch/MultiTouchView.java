@@ -12,6 +12,8 @@ import android.util.Log;
 
 import java.util.ArrayList;
 
+import static java.lang.Math.abs;
+
 /**
  * Created by Marcelino Cabrera on 21/03/2017.
  */
@@ -20,6 +22,10 @@ public class MultiTouchView extends View {
 
     private static final int STROKE_WIDTH = 10;
     private static final int CIRCLE_RADIUS = 30;
+    public float x=(float) 0.0;
+    public float y= (float) 0.0;
+    public float radio= (float) 40.0;
+    public boolean inicializado=false;
 
     // Lista de puntos pulsados en la pantalla
     private ArrayList<PointF> touchPoints = null;
@@ -48,22 +54,40 @@ public class MultiTouchView extends View {
         {
             if(touchPoints.size() == 1) // Muesta un punto en pantalla
             {
-                canvas.drawCircle(touchPoints.get(0).x,touchPoints.get(0).y,CIRCLE_RADIUS, drawingPaint);
+                if(!inicializado){
+                    canvas.drawCircle(touchPoints.get(0).x,touchPoints.get(0).y,radio, drawingPaint);
+                    inicializado=true;
+                    x=touchPoints.get(0).x;
+                    y=touchPoints.get(0).y;
+                }else {
+
+                    float miX = touchPoints.get(0).x;
+                    float miY = touchPoints.get(0).y;
+
+                    if (abs(x - miX) < radio*1.5 && abs(y - miY) < radio*1.5) {
+                        canvas.drawCircle(touchPoints.get(0).x, touchPoints.get(0).y, radio, drawingPaint);
+                        x = miX;
+                        y = miY;
+                    }else{
+                        canvas.drawCircle(x, y, radio, drawingPaint);
+                    }
+                }
+
             } else // Muestra un los puntos unidos con una linea y el punto medio
             {
-                PointF midpt = null;
-                for(int index=1; index<touchPoints.size(); ++index)
-                {
-                    midpt = getMidPoint(
-                            touchPoints.get(index - 1).x,touchPoints.get(index - 1).y,
-                            touchPoints.get(index).x,touchPoints.get(index).y);
-                    canvas.drawCircle(touchPoints.get(index - 1).x,touchPoints.get(index - 1).y,CIRCLE_RADIUS, drawingPaint);
-                    canvas.drawCircle(touchPoints.get(index).x,touchPoints.get(index).y,CIRCLE_RADIUS, drawingPaint);
-                    canvas.drawLine(
-                            touchPoints.get(index - 1).x,touchPoints.get(index - 1).y,
-                            touchPoints.get(index).x,touchPoints.get(index).y,drawingPaint);
-                    canvas.drawCircle(midpt.x,midpt.y, CIRCLE_RADIUS/2, drawingPaint);
-                }
+//                PointF midpt = null;
+//                for(int index=1; index<touchPoints.size(); ++index)
+//                {
+//                    midpt = getMidPoint(
+//                            touchPoints.get(index - 1).x,touchPoints.get(index - 1).y,
+//                            touchPoints.get(index).x,touchPoints.get(index).y);
+//                    canvas.drawCircle(touchPoints.get(index - 1).x,touchPoints.get(index - 1).y,CIRCLE_RADIUS, drawingPaint);
+//                    canvas.drawCircle(touchPoints.get(index).x,touchPoints.get(index).y,CIRCLE_RADIUS, drawingPaint);
+//                    canvas.drawLine(
+//                            touchPoints.get(index - 1).x,touchPoints.get(index - 1).y,
+//                            touchPoints.get(index).x,touchPoints.get(index).y,drawingPaint);
+//                    canvas.drawCircle(midpt.x,midpt.y, CIRCLE_RADIUS/2, drawingPaint);
+//                }
             }
             // Redibuja el canvas
             invalidate();
@@ -102,12 +126,13 @@ public class MultiTouchView extends View {
             // Movemos
             case MotionEvent.ACTION_MOVE:   {
                 setPoints(event);// Fija puntos nuevos
-                invalidate(); // Redibuja
+                //invalidate(); // Redibuja
                 break;
             }
             // Levantamos
             case MotionEvent.ACTION_UP:   {
-                initialize (); // Borra la pantalla
+                //initialize (); // Borra la pantalla
+
                 break;
             }
 
@@ -121,7 +146,7 @@ public class MultiTouchView extends View {
             }
             // Levantamos
             case MotionEvent.ACTION_POINTER_UP:   {
-                initialize (); // Borra la pantalla
+                //initialize (); // Borra la pantalla
                 break;
             }
 
@@ -137,6 +162,7 @@ public class MultiTouchView extends View {
         drawingPaint.setStyle(Paint.Style.FILL);
         drawingPaint.setAntiAlias(true);
         touchPoints = new ArrayList<PointF>();
+
     }
 
     private PointF getMidPoint(float x1,float y1, float x2, float y2) {
